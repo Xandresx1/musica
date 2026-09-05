@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Descargar musica</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 20px 16px 60px; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+         background: #fdf8f1; color: #2b2622; font-size: 18px; line-height: 1.4; }
+  .caja { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 30px; margin: 8px 0 4px; }
+  .sub { color: #6b625a; margin: 0 0 22px; font-size: 17px; }
+  .boton { display: block; width: 100%; border: 0; border-radius: 18px; cursor: pointer; background: #1f7a4d; color: #fff;
+           font-size: 24px; font-weight: 700; padding: 22px 18px; box-shadow: 0 6px 18px rgba(31,122,77,.28); }
+  .boton:active { transform: scale(.98); }
+  .boton[disabled] { background: #8fb9a3; box-shadow: none; cursor: default; }
+  .estado { margin: 14px 0 6px; min-height: 28px; font-size: 18px; font-weight: 600; color: #1f7a4d; }
+  .barra { height: 14px; background: #e7dfd5; border-radius: 8px; overflow: hidden; margin-bottom: 26px; }
+  .barra > div { height: 100%; width: 0; background: #1f7a4d; transition: width .3s; }
+  .ayuda { background: #fff4d6; border: 1px solid #f0d9a0; border-radius: 12px; padding: 12px 14px; font-size: 16px; margin-bottom: 26px; }
+  h2 { font-size: 20px; color: #6b625a; margin: 0 0 10px; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 14px; padding: 12px 12px 12px 16px;
+       margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  li .n { flex: 1; font-size: 17px; word-break: break-word; }
+  li button, li a { flex: none; width: 48px; height: 48px; border-radius: 12px; border: 0; display: inline-flex;
+                    align-items: center; justify-content: center; font-size: 20px; cursor: pointer; text-decoration: none; }
+  li button { background: #efe7dc; color: #2b2622; }
+  li a { background: #1f7a4d; color: #fff; }
+  li.sonando { outline: 3px solid #1f7a4d; }
+  audio { width: 100%; margin-top: 8px; }
+  .pie { text-align: center; color: #9a908a; font-size: 14px; margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="caja">
+  <h1>Musica compilado</h1>
+  <p class="sub">57 canciones · 347 MB en total</p>
+
+  <button class="boton" id="btnTodo" onclick="descargarTodo()">⬇️ Descargar TODAS las canciones</button>
+  <div class="estado" id="estado"></div>
+  <div class="barra"><div id="progreso"></div></div>
+
+  <div class="ayuda">
+    <b>Si el celular pregunta "¿Descargar varios archivos?"</b> toca <b>PERMITIR</b>.<br>
+    Las canciones quedan en la carpeta <b>Descargas</b> del celular.
+  </div>
+
+  <h2>O escuchar / bajar una por una</h2>
+  <ul id="lista"></ul>
+  <audio id="player" controls preload="none"></audio>
+  <p class="pie">Hecha con cariño para escuchar sin complicaciones.</p>
+</div>
+
+<script>
+const canciones = [{"nombre": "'Cause You Are Young C.C. Catch", "archivo": "'Cause You Are Young C.C. Catch.mp3", "url": "Musica_MP3/%27Cause%20You%20Are%20Young%20C.C.%20Catch.mp3"}, {"nombre": "A Bad Dream Keane", "archivo": "A Bad Dream Keane.mp3", "url": "Musica_MP3/A%20Bad%20Dream%20Keane.mp3"}, {"nombre": "Africa Toto", "archivo": "Africa Toto.mp3", "url": "Musica_MP3/Africa%20Toto.mp3"}, {"nombre": "Atlantis Is Calling (S.O.S. for Love) Modern Talking", "archivo": "Atlantis Is Calling (S.O.S. for Love) Modern Talking.mp3", "url": "Musica_MP3/Atlantis%20Is%20Calling%20%28S.O.S.%20for%20Love%29%20Modern%20Talking.mp3"}, {"nombre": "Black Is Black Los Bravos", "archivo": "Black Is Black Los Bravos.mp3", "url": "Musica_MP3/Black%20Is%20Black%20Los%20Bravos.mp3"}, {"nombre": "Born to Be Alive Patrick Hernandez", "archivo": "Born to Be Alive Patrick Hernandez.mp3", "url": "Musica_MP3/Born%20to%20Be%20Alive%20Patrick%20Hernandez.mp3"}, {"nombre": "Brother Louie Modern Talking", "archivo": "Brother Louie Modern Talking.mp3", "url": "Musica_MP3/Brother%20Louie%20Modern%20Talking.mp3"}, {"nombre": "Can't Help Falling in Love Chris Isaak", "archivo": "Can't Help Falling in Love Chris Isaak.mp3", "url": "Musica_MP3/Can%27t%20Help%20Falling%20in%20Love%20Chris%20Isaak.mp3"}, {"nombre": "Cheri Cheri Lady Modern Talking", "archivo": "Cheri Cheri Lady Modern Talking.mp3", "url": "Musica_MP3/Cheri%20Cheri%20Lady%20Modern%20Talking.mp3"}, {"nombre": "Creep Radiohead", "archivo": "Creep Radiohead.mp3", "url": "Musica_MP3/Creep%20Radiohead.mp3"}, {"nombre": "Cry Baby The Neighbourhood", "archivo": "Cry Baby The Neighbourhood.mp3", "url": "Musica_MP3/Cry%20Baby%20The%20Neighbourhood.mp3"}, {"nombre": "De Do Do Do, De Da Da Da The Police", "archivo": "De Do Do Do, De Da Da Da The Police.mp3", "url": "Musica_MP3/De%20Do%20Do%20Do%2C%20De%20Da%20Da%20Da%20The%20Police.mp3"}, {"nombre": "Demon Lover Shocking Blue", "archivo": "Demon Lover Shocking Blue.mp3", "url": "Musica_MP3/Demon%20Lover%20Shocking%20Blue.mp3"}, {"nombre": "Der Kommissar Falco", "archivo": "Der Kommissar Falco.mp3", "url": "Musica_MP3/Der%20Kommissar%20Falco.mp3"}, {"nombre": "Do You Wanna Modern Talking", "archivo": "Do You Wanna Modern Talking.mp3", "url": "Musica_MP3/Do%20You%20Wanna%20Modern%20Talking.mp3"}, {"nombre": "Don't Stand So Close to Me The Police", "archivo": "Don't Stand So Close to Me The Police.mp3", "url": "Musica_MP3/Don%27t%20Stand%20So%20Close%20to%20Me%20The%20Police.mp3"}, {"nombre": "Drive The Cars", "archivo": "Drive The Cars.mp3", "url": "Musica_MP3/Drive%20The%20Cars.mp3"}, {"nombre": "Every Breath You Take The Police", "archivo": "Every Breath You Take The Police.mp3", "url": "Musica_MP3/Every%20Breath%20You%20Take%20The%20Police.mp3"}, {"nombre": "Everybody's Changing Keane", "archivo": "Everybody's Changing Keane.mp3", "url": "Musica_MP3/Everybody%27s%20Changing%20Keane.mp3"}, {"nombre": "Forever Young Alphaville", "archivo": "Forever Young Alphaville.mp3", "url": "Musica_MP3/Forever%20Young%20Alphaville.mp3"}, {"nombre": "Heart of Glass Blondie", "archivo": "Heart of Glass Blondie.mp3", "url": "Musica_MP3/Heart%20of%20Glass%20Blondie.mp3"}, {"nombre": "Heaven Bryan Adams", "archivo": "Heaven Bryan Adams.mp3", "url": "Musica_MP3/Heaven%20Bryan%20Adams.mp3"}, {"nombre": "Hey Hey Guy Ken Laszlo", "archivo": "Hey Hey Guy Ken Laszlo.mp3", "url": "Musica_MP3/Hey%20Hey%20Guy%20Ken%20Laszlo.mp3"}, {"nombre": "House of the Rising Sun The Animals", "archivo": "House of the Rising Sun The Animals.mp3", "url": "Musica_MP3/House%20of%20the%20Rising%20Sun%20The%20Animals.mp3"}, {"nombre": "I Want to Know What Love Is Foreigner", "archivo": "I Want to Know What Love Is Foreigner.mp3", "url": "Musica_MP3/I%20Want%20to%20Know%20What%20Love%20Is%20Foreigner.mp3"}, {"nombre": "I Was Made for Lovin' You KISS", "archivo": "I Was Made for Lovin' You KISS.mp3", "url": "Musica_MP3/I%20Was%20Made%20for%20Lovin%27%20You%20KISS.mp3"}, {"nombre": "I Will Always Love You Whitney Houston", "archivo": "I Will Always Love You Whitney Houston.mp3", "url": "Musica_MP3/I%20Will%20Always%20Love%20You%20Whitney%20Houston.mp3"}, {"nombre": "I'd Love You to Want Me Lobo", "archivo": "I'd Love You to Want Me Lobo.mp3", "url": "Musica_MP3/I%27d%20Love%20You%20to%20Want%20Me%20Lobo.mp3"}, {"nombre": "Last Train to London Electric Light Orchestra (ELO)", "archivo": "Last Train to London Electric Light Orchestra (ELO).mp3", "url": "Musica_MP3/Last%20Train%20to%20London%20Electric%20Light%20Orchestra%20%28ELO%29.mp3"}, {"nombre": "Life Is Life Opus", "archivo": "Life Is Life Opus.mp3", "url": "Musica_MP3/Life%20Is%20Life%20Opus.mp3"}, {"nombre": "Losing My Religion R.E.M.", "archivo": "Losing My Religion R.E.M..mp3", "url": "Musica_MP3/Losing%20My%20Religion%20R.E.M..mp3"}, {"nombre": "Love Hurts Nazareth", "archivo": "Love Hurts Nazareth.mp3", "url": "Musica_MP3/Love%20Hurts%20Nazareth.mp3"}, {"nombre": "Message in a Bottle The Police", "archivo": "Message in a Bottle The Police.mp3", "url": "Musica_MP3/Message%20in%20a%20Bottle%20The%20Police.mp3"}, {"nombre": "More Than I Can Say Leo Sayer", "archivo": "More Than I Can Say Leo Sayer.mp3", "url": "Musica_MP3/More%20Than%20I%20Can%20Say%20Leo%20Sayer.mp3"}, {"nombre": "One Way Ticket Eruption", "archivo": "One Way Ticket Eruption.mp3", "url": "Musica_MP3/One%20Way%20Ticket%20Eruption.mp3"}, {"nombre": "Pumped Up Kicks Foster the People", "archivo": "Pumped Up Kicks Foster the People.mp3", "url": "Musica_MP3/Pumped%20Up%20Kicks%20Foster%20the%20People.mp3"}, {"nombre": "Roxanne The Police", "archivo": "Roxanne The Police.mp3", "url": "Musica_MP3/Roxanne%20The%20Police.mp3"}, {"nombre": "Sacrifice Elton John", "archivo": "Sacrifice Elton John.mp3", "url": "Musica_MP3/Sacrifice%20Elton%20John.mp3"}, {"nombre": "Said I Loved You But I Lied Michael Bolton", "archivo": "Said I Loved You But I Lied Michael Bolton.mp3", "url": "Musica_MP3/Said%20I%20Loved%20You%20But%20I%20Lied%20Michael%20Bolton.mp3"}, {"nombre": "So Lonely The Police", "archivo": "So Lonely The Police.mp3", "url": "Musica_MP3/So%20Lonely%20The%20Police.mp3"}, {"nombre": "Somewhere Only We Know Keane", "archivo": "Somewhere Only We Know Keane.mp3", "url": "Musica_MP3/Somewhere%20Only%20We%20Know%20Keane.mp3"}, {"nombre": "Strangers by Night C.C. Catch", "archivo": "Strangers by Night C.C. Catch.mp3", "url": "Musica_MP3/Strangers%20by%20Night%20C.C.%20Catch.mp3"}, {"nombre": "Stuck with Me The Neighbourhood", "archivo": "Stuck with Me The Neighbourhood.mp3", "url": "Musica_MP3/Stuck%20with%20Me%20The%20Neighbourhood.mp3"}, {"nombre": "Take My Breath Away Berlin", "archivo": "Take My Breath Away Berlin.mp3", "url": "Musica_MP3/Take%20My%20Breath%20Away%20Berlin.mp3"}, {"nombre": "Take On Me a ha", "archivo": "Take On Me a ha.mp3", "url": "Musica_MP3/Take%20On%20Me%20a%20ha.mp3"}, {"nombre": "The Lady in Red Chris de Burgh", "archivo": "The Lady in Red Chris de Burgh.mp3", "url": "Musica_MP3/The%20Lady%20in%20Red%20Chris%20de%20Burgh.mp3"}, {"nombre": "The Sound of Silence Disturbed", "archivo": "The Sound of Silence Disturbed.mp3", "url": "Musica_MP3/The%20Sound%20of%20Silence%20Disturbed.mp3"}, {"nombre": "The Sound of Silence Simon & Garfunkel", "archivo": "The Sound of Silence Simon & Garfunkel.mp3", "url": "Musica_MP3/The%20Sound%20of%20Silence%20Simon%20%26%20Garfunkel.mp3"}, {"nombre": "Visitors Koto", "archivo": "Visitors Koto.mp3", "url": "Musica_MP3/Visitors%20Koto.mp3"}, {"nombre": "What Is Love Haddaway", "archivo": "What Is Love Haddaway.mp3", "url": "Musica_MP3/What%20Is%20Love%20Haddaway.mp3"}, {"nombre": "White Flag Dido", "archivo": "White Flag Dido.mp3", "url": "Musica_MP3/White%20Flag%20Dido.mp3"}, {"nombre": "Wicked Game Chris Isaak", "archivo": "Wicked Game Chris Isaak.mp3", "url": "Musica_MP3/Wicked%20Game%20Chris%20Isaak.mp3"}, {"nombre": "Woman in Love Barbra Streisand", "archivo": "Woman in Love Barbra Streisand.mp3", "url": "Musica_MP3/Woman%20in%20Love%20Barbra%20Streisand.mp3"}, {"nombre": "You Are the One a ha", "archivo": "You Are the One a ha.mp3", "url": "Musica_MP3/You%20Are%20the%20One%20a%20ha.mp3"}, {"nombre": "You Can Win If You Want Modern Talking", "archivo": "You Can Win If You Want Modern Talking.mp3", "url": "Musica_MP3/You%20Can%20Win%20If%20You%20Want%20Modern%20Talking.mp3"}, {"nombre": "You're My Heart, You're My Soul Modern Talking", "archivo": "You're My Heart, You're My Soul Modern Talking.mp3", "url": "Musica_MP3/You%27re%20My%20Heart%2C%20You%27re%20My%20Soul%20Modern%20Talking.mp3"}, {"nombre": "Your Love The Outfield", "archivo": "Your Love The Outfield.mp3", "url": "Musica_MP3/Your%20Love%20The%20Outfield.mp3"}];
+const lista = document.getElementById("lista");
+const player = document.getElementById("player");
+const estado = document.getElementById("estado");
+const progreso = document.getElementById("progreso");
+const btnTodo = document.getElementById("btnTodo");
+
+canciones.forEach((c, i) => {
+  const li = document.createElement("li");
+  li.id = "c" + i;
+  li.innerHTML =
+    `<span class="n">${c.nombre}</span>` +
+    `<button title="Escuchar" onclick="reproducir(${i})">▶️</button>` +
+    `<a title="Descargar" href="${c.url}" download="${c.archivo}">⬇️</a>`;
+  lista.appendChild(li);
+});
+
+function reproducir(i) {
+  document.querySelectorAll("li.sonando").forEach(el => el.classList.remove("sonando"));
+  document.getElementById("c" + i).classList.add("sonando");
+  player.src = canciones[i].url;
+  player.play();
+  player.onended = () => { if (i + 1 < canciones.length) reproducir(i + 1); };
+}
+
+function bajar(c) {
+  const a = document.createElement("a");
+  a.href = c.url;
+  a.download = c.archivo;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+async function descargarTodo() {
+  btnTodo.disabled = true;
+  for (let i = 0; i < canciones.length; i++) {
+    estado.textContent = `Descargando ${i + 1} de ${canciones.length}: ${canciones[i].nombre}`;
+    progreso.style.width = ((i + 1) / canciones.length * 100) + "%";
+    bajar(canciones[i]);
+    await new Promise(r => setTimeout(r, 1500));   // pausa para que el celular no se sature
+  }
+  estado.textContent = `✅ Listo. Las ${canciones.length} canciones están en Descargas.`;
+  btnTodo.textContent = "Descargar de nuevo";
+  btnTodo.disabled = false;
+}
+</script>
+</body>
+</html>
